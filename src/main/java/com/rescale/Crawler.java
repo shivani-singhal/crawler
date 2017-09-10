@@ -17,7 +17,7 @@ public class Crawler{
 	private HashSet<String> visitedUrls;
 	private ArrayList<String> toVisitUrls;
 	private Integer count;
-	private final int MAX_THREADS = 100;
+	private final int MAX_THREADS = 5;
 
 	public Crawler(){
 		visitedUrls = new HashSet<String>();
@@ -49,7 +49,7 @@ public class Crawler{
 	    initiateThreads(executor);
 
 	    /*
-	     * Wait until all links are crawled then shutdown executor
+	     *Wait until all links are crawled then shutdown executor
 	     */
 	     
 	    while(flag == 0){
@@ -75,7 +75,6 @@ public class Crawler{
 		for(int i = 0; i < MAX_THREADS; i++){
 	            
 	        WorkerThread task = new WorkerThread();
-	        System.out.println("A new task has been added : " + i);
 	        executor.execute(task);
 	    }        
 	}
@@ -125,7 +124,6 @@ public class Crawler{
 				collectUrls(linkCollection);
 
 				synchronized(toVisitUrls){
-					System.out.println("Out from here");
 					System.out.println(linkCollection.toString());
 					count--;
 					toVisitUrls.notifyAll();
@@ -142,25 +140,21 @@ public class Crawler{
 	    	Document doc = null;
 			try{
 				Connection connection = Jsoup.connect(url);
-
-				//connection.userAgent("Mozilla/5.0");
-				//set timeout to 10 seconds
+				connection.userAgent("Mozilla/5.0");
+				//set timeout to 100 seconds
     			connection.timeout(10 * 10000);
     			doc = connection.get();
 			}catch(Exception e){
-				e.printStackTrace();
+				/*e.printStackTrace(); */ //For debugging purposes 
 				return;	
 			}
-		//	System.out.println("starting to collecr urls");
+
 			Elements links = doc.getElementsByTag("a");
 			for (Element link : links) {
-				//System.out.println("In the loop");
-				//System.out.println(link.attr("href"));
+
 				String linkHref = link.attr("href");
 				if((linkHref.startsWith("http://")|| 
-					linkHref.startsWith("https://")) && linkHref.contains("rescale.com/")){
-					
-				 //  System.out.println("got one url");
+					linkHref.startsWith("https://"))){
 					
 					linkCollection.append("\n ");
 					linkCollection.append(linkHref);
@@ -171,10 +165,8 @@ public class Crawler{
 							toVisitUrls.notifyAll();
 						}
 					}
-					//System.out.println(linkCollection.toString());
 				}
 			}
 	    }
-
 	}
 }

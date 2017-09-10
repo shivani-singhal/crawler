@@ -5,9 +5,14 @@ mvn exec:java -Dexec.args="url to be crawled"
 
 eg: mvn exec:java -Dexec.args="http://www.rescale.com/"
 
-The crawl function of the crawler class creates a thread pool of MAX_THREADS which is 100.
+The crawl function of the crawler class creates a thread pool of MAX_THREADS which is 5.
+The number of threads can be changed in the program by changing the MAX_THREADS variable. 
+It should be noted that larger number of threads may cause Connection refused exception due to possibly overloading the server.
 The threads in the thread pool remove a url from toVisitUrls list and push it into visitedUrls HashSet so as to not traverse a url twice
 Each time a thread starts processing a url it incrments the count instance variable by 1 and decreases it by 1 when crawling of the page is complete
 the thread calls the collectUrls function to crawl a webpage and collect all the links from the anchor tags of the url
 When count is zero and visitedUrls list is empty, it implies that there are no more urls to be crawled that is when the threadpool executor is shut down.
+Locks have been used on toVisitUrls object to avoid concurrency issues while modifying tovisiturls, visitedUrls and count variables
+
+
 
